@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -202,14 +203,14 @@
 <body>
     <h1>Player : John Doe</h1>
     <div id="game-container">
-        <img id="dino" src="dino2.png" alt="Dino">
+        <img id="dino" src="dino.png" alt="Dino">
         <img id="cactus" src="cactus.png" alt="Cactus">
     </div>
     <div id="score">0</div>
     <div id="total-score">Total: 0</div>
     <div id="high-score">High Score: 0</div>
     <button id="start-button">Start Game</button>
-    <button id="dashboard-button">Dashboard</button>
+    <button id="dashboard-button">Leader Board</button>
 
     <!-- Dashboard Popup -->
     <div id="overlay"></div>
@@ -244,23 +245,23 @@
 
     <!-- Bottom Navbar -->
     <div id="navbar">
-        <a href="#play" class="nav-item">
+        <a href="#play" class="nav-item" id="nav-play">
             <img src="play.png" alt="Play" class="nav-icon">
             <span>Play</span>
         </a>
-        <a href="#race" class="nav-item">
+        <a href="#race" class="nav-item" id="nav-race">
             <img src="race.png" alt="Race" class="nav-icon">
             <span>Race</span>
         </a>
-        <a href="#earn" class="nav-item">
+        <a href="#earn" class="nav-item" id="nav-earn">
             <img src="earn.png" alt="Earn" class="nav-icon">
             <span>Earn</span>
         </a>
-        <a href="#invite" class="nav-item">
+        <a href="#invite" class="nav-item" id="nav-friends">
             <img src="friends.png" alt="Invite" class="nav-icon">
             <span>Friends</span>
         </a>
-        <a href="#airdrop" class="nav-item">
+        <a href="#airdrop" class="nav-item" id="nav-airdrop">
             <img src="airdrop.png" alt="Airdrop" class="nav-icon">
             <span>Airdrop</span>
         </a>
@@ -310,7 +311,7 @@
                     dino.style.bottom = '0px';
                 }
             }
-        }, 20);
+        }, 15);
     }
 }
 
@@ -354,27 +355,33 @@
             }
         }
 
-        function startGame() {
-            if (!isGameRunning) {
-                isGameRunning = true;
-                score = 0;
-                scoreDisplay.textContent = '0';
-                totalScore = 0;
-                totalScoreDisplay.textContent = 'Total: 0';
-                startButton.style.display = 'none';
-                cactus.style.left = '600px';
-                gameLoop = moveCactus();
-                addEventListeners();
-            }
-        }
+        function switchDinoImage(isRunning) {
+        dino.src = isRunning ? "dino.gif" : "dino.png";
+    }
 
-        function endGame() {
-            isGameRunning = false;
-            clearInterval(gameLoop);
-            showGameOverPopup();
-            startButton.style.display = 'block';
-            removeEventListeners();
+    function startGame() {
+        if (!isGameRunning) {
+            isGameRunning = true;
+            score = 0;
+            scoreDisplay.textContent = '0';
+            totalScore = 0;
+            totalScoreDisplay.textContent = 'Total: 0';
+            startButton.style.display = 'none';
+            cactus.style.left = '600px';
+            gameLoop = moveCactus();
+            addEventListeners();
+            switchDinoImage(true); // Switch to dino.gif when game starts
         }
+    }
+
+    function endGame() {
+        isGameRunning = false;
+        clearInterval(gameLoop);
+        showGameOverPopup();
+        startButton.style.display = 'block';
+        removeEventListeners();
+        switchDinoImage(false); // Switch back to dino.png when game ends
+    }
 
         function showGameOverPopup() {
         const gameOverPopup = document.createElement('div');
@@ -439,6 +446,51 @@
         overlay.addEventListener('click', () => {
             overlay.style.display = 'none';
             dashboardPopup.style.display = 'none';
+        });
+    
+        function showComingSoonPopup() {
+            const popup = document.createElement('div');
+            popup.style.position = 'fixed';
+            popup.style.top = '50%';
+            popup.style.left = '50%';
+            popup.style.transform = 'translate(-50%, -50%)';
+            popup.style.backgroundColor = '#fff';
+            popup.style.border = '1px solid #ccc';
+            popup.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+            popup.style.padding = '20px';
+            popup.style.borderRadius = '8px';
+            popup.style.zIndex = '1002';
+            popup.innerHTML = '<center><b>Thanks for the Interest! <br><br> Stay Tuned! <br><br> We are Coming Soon!</b></center>';
+            document.body.appendChild(popup);
+
+            setTimeout(() => {
+                popup.remove();
+            }, 2000);
+        }
+
+        document.getElementById('nav-play').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'index.html';
+        });
+
+        document.getElementById('nav-race').addEventListener('click', (e) => {
+            e.preventDefault();
+            showComingSoonPopup();
+        });
+
+        document.getElementById('nav-earn').addEventListener('click', (e) => {
+            e.preventDefault();
+            showComingSoonPopup();
+        });
+
+        document.getElementById('nav-friends').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'friends.html';
+        });
+
+        document.getElementById('nav-airdrop').addEventListener('click', (e) => {
+            e.preventDefault();
+            showComingSoonPopup();
         });
     </script>
 </body>
