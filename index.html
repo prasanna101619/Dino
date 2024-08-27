@@ -42,7 +42,7 @@ body {
     right: -30px;
 }
 
-#score, #high-score {
+#score, #high-score, #total-score {
     font-size: 18px;
     margin-top: 10px;
 }
@@ -52,6 +52,37 @@ body {
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
+}
+
+#dashboard {
+    margin-top: 20px;
+    padding: 10px;
+    width: 100%;
+    max-width: 600px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+}
+
+#dashboard h2 {
+    margin: 0;
+    font-size: 20px;
+    text-align: center;
+}
+
+#dashboard table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#dashboard th, #dashboard td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+#dashboard th {
+    background-color: #f2f2f2;
 }
 
 @media (max-width: 768px) {
@@ -70,7 +101,7 @@ body {
         height: 40px;
     }
 
-    #score, #high-score {
+    #score, #high-score, #total-score {
         font-size: 16px;
     }
 
@@ -100,7 +131,7 @@ body {
         height: 30px;
     }
 
-    #score, #high-score {
+    #score, #high-score, #total-score {
         font-size: 14px;
     }
 
@@ -112,160 +143,183 @@ body {
 </style>
 </head>
 <body>
+
+    <h1>Player: John Doe</h1>
     <div id="game-container">
         <img id="dino" src="dino.png" alt="Dino">
         <img id="cactus" src="cactus.png" alt="Cactus">
     </div>
     <div id="score">0</div>
-    <div id="high-score">HI 0</div>
+    <div id="total-score">Total: 0</div>
+    <div id="high-score">High Score: 0</div>
     <button id="start-button">Start Game</button>
-    <script src="script.js"></script>
+
+    <div id="dashboard">
+        <h2>Dashboard</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Name</th>
+                    <th>Total Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Generate 100 rows of dummy data -->
+                <script>
+                    const dummyData = [
+                        { name: "John", score: "10m" },
+                        { name: "Paul", score: "9.9m" },
+                        { name: "George", score: "9.8m" },
+                        { name: "Ringo", score: "9.7m" },
+                        { name: "Mick", score: "9.6m" },
+                        { name: "Keith", score: "9.5m" },
+                        { name: "Charlie", score: "9.4m" },
+                        { name: "Ronnie", score: "9.3m" },
+                        { name: "Elton", score: "9.2m" },
+                        { name: "David", score: "9.1m" },
+                        // Add more entries if needed
+                    ];
+
+                    for (let i = 0; i < dummyData.length; i++) {
+                        document.write(
+                            `<tr><td>${i + 1}</td><td>${dummyData[i].name}</td><td>${dummyData[i].score}</td></tr>`
+                        );
+                    }
+                </script>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const dino = document.getElementById('dino');
+        const cactus = document.getElementById('cactus');
+        const scoreDisplay = document.getElementById('score');
+        const highScoreDisplay = document.getElementById('high-score');
+        const totalScoreDisplay = document.getElementById('total-score');
+        const startButton = document.getElementById('start-button');
+
+        let isJumping = false;
+        let score = 0;
+        let highScore = 0;
+        let totalScore = 0;
+        let gameSpeed = 20;
+        let gameLoop;
+        let isGameRunning = false;
+        let isDescending = false;
+
+        function jump() {
+            if (!isJumping && isGameRunning) {
+                isJumping = true;
+                let jumpHeight = 0;
+                const maxJumpHeight = 100;
+                const jumpSpeed = 5;
+
+                const jumpInterval = setInterval(() => {
+                    if (jumpHeight < maxJumpHeight && !isDescending) {
+                        jumpHeight += jumpSpeed;
+                        dino.style.bottom = `${jumpHeight}px`;
+                    } else {
+                        isDescending = true;
+                        jumpHeight -= jumpSpeed;
+                        dino.style.bottom = `${jumpHeight}px`;
+
+                        if (jumpHeight <= 0) {
+                            clearInterval(jumpInterval);
+                            isJumping = false;
+                            isDescending = false;
+                            dino.style.bottom = '0px';
+                        }
+                    }
+                }, 20);
+            }
+        }
+
+        function moveCactus() {
+            let position = 600;
+            cactus.style.left = `${position}px`;
+            
+            return setInterval(() => {
+                if (position < -20) {
+                    position = 600;
+                    score++;
+                    totalScore++;
+                    scoreDisplay.textContent = score;
+                    totalScoreDisplay.textContent = `Total: ${totalScore}`;
+                    if (score > highScore) {
+                        highScore = score;
+                        highScoreDisplay.textContent = `High Score: ${highScore}`;
+                    }
+                    gameSpeed = Math.max(5, 20 - Math.floor(score / 100));
+                } else {
+                    position -= 5;
+                }
+                cactus.style.left = `${position}px`;
+
+                checkCollision();
+            }, gameSpeed);
+        }
+
+        function checkCollision() {
+            const dinoRect = dino.getBoundingClientRect();
+            const cactusRect = cactus.getBoundingClientRect();
+
+            if (
+                dinoRect.right > cactusRect.left &&
+                dinoRect.left < cactusRect.right &&
+                dinoRect.bottom > cactusRect.top &&
+                dinoRect.top < cactusRect.bottom
+            ) {
+                endGame();
+            }
+        }
+
+        function startGame() {
+            if (!isGameRunning) {
+                isGameRunning = true;
+                score = 0;
+                scoreDisplay.textContent = '0';
+                startButton.style.display = 'none';
+                cactus.style.left = '600px';
+                gameLoop = moveCactus();
+                addEventListeners();
+            }
+        }
+
+        function endGame() {
+            isGameRunning = false;
+            clearInterval(gameLoop);
+            alert(`Game Over! Your score: ${score}`);
+            startButton.style.display = 'block';
+            removeEventListeners();
+        }
+
+        function handleJumpAction(event) {
+            if (isGameRunning) {
+                jump();
+                event.preventDefault(); // Prevent page scrolling or default touch actions
+            }
+        }
+
+        function addEventListeners() {
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('mousedown', handleJumpAction);
+            document.addEventListener('touchstart', handleJumpAction);
+        }
+
+        function removeEventListeners() {
+            document.removeEventListener('keydown', handleKeyDown);
+            document.removeEventListener('mousedown', handleJumpAction);
+            document.removeEventListener('touchstart', handleJumpAction);
+        }
+
+        function handleKeyDown(event) {
+            if (event.code === 'Space') {
+                handleJumpAction(event);
+            }
+        }
+
+        startButton.addEventListener('click', startGame);
+    </script>
 </body>
 </html>
-
-<script>
-    const dino = document.getElementById('dino');
-    const cactus = document.getElementById('cactus');
-    const scoreDisplay = document.getElementById('score');
-    const highScoreDisplay = document.getElementById('high-score');
-    const startButton = document.getElementById('start-button');
-
-    let isJumping = false;
-    let score = 0;
-    let highScore = 0;
-    let gameSpeed = 20;
-    let gameLoop;
-    let isGameRunning = false;
-    let isDescending = false;
-
-    function jump() {
-        if (!isJumping && isGameRunning) {
-            isJumping = true;
-            let jumpHeight = 0;
-            const maxJumpHeight = 100;
-            const jumpSpeed = 5;
-
-            const jumpInterval = setInterval(() => {
-                if (jumpHeight < maxJumpHeight && !isDescending) {
-                    jumpHeight += jumpSpeed;
-                    dino.style.bottom = `${jumpHeight}px`;
-                } else {
-                    isDescending = true;
-                    jumpHeight -= jumpSpeed;
-                    dino.style.bottom = `${jumpHeight}px`;
-
-                    if (jumpHeight <= 0) {
-                        clearInterval(jumpInterval);
-                        isJumping = false;
-                        isDescending = false;
-                        dino.style.bottom = '0px';
-                    }
-                }
-            }, 20);
-        }
-    }
-
-    function moveCactus() {
-        let position = 600;
-        cactus.style.left = `${position}px`;
-        
-        return setInterval(() => {
-            if (position < -20) {
-                position = 600;
-                score++;
-                scoreDisplay.textContent = score;
-                if (score > highScore) {
-                    highScore = score;
-                    highScoreDisplay.textContent = `HI ${highScore}`;
-                }
-                gameSpeed = Math.max(5, 20 - Math.floor(score / 100));
-            } else {
-                position -= 5;
-            }
-            cactus.style.left = `${position}px`;
-
-            checkCollision();
-        }, gameSpeed);
-    }
-
-    function checkCollision() {
-        const dinoRect = dino.getBoundingClientRect();
-        const cactusRect = cactus.getBoundingClientRect();
-
-        if (
-            dinoRect.right > cactusRect.left &&
-            dinoRect.left < cactusRect.right &&
-            dinoRect.bottom > cactusRect.top &&
-            dinoRect.top < cactusRect.bottom
-        ) {
-            endGame();
-        }
-    }
-
-    function startGame() {
-        if (!isGameRunning) {
-            isGameRunning = true;
-            score = 0;
-            scoreDisplay.textContent = '0';
-            startButton.style.display = 'none';
-            cactus.style.left = '600px';
-            gameLoop = moveCactus();
-            addEventListeners();
-        }
-    }
-
-    function endGame() {
-        isGameRunning = false;
-        clearInterval(gameLoop);
-        alert(`Game Over! Your score: ${score}`);
-        startButton.style.display = 'block';
-        removeEventListeners();
-    }
-
-    function handleJumpAction(event) {
-        if (isGameRunning) {
-            jump();
-            event.preventDefault(); // Prevent page scrolling or default touch actions
-        }
-    }
-
-    function startGame() {
-        if (!isGameRunning) {
-            isGameRunning = true;
-            score = 0;
-            scoreDisplay.textContent = '0';
-            startButton.style.display = 'none';
-            cactus.style.left = '600px';
-            gameLoop = moveCactus();
-            addEventListeners();
-        }
-    }
-
-    function endGame() {
-        isGameRunning = false;
-        clearInterval(gameLoop);
-        alert(`Game Over! Your score: ${score}`);
-        startButton.style.display = 'block';
-        removeEventListeners();
-    }
-
-    function addEventListeners() {
-        document.addEventListener('keydown', handleKeyDown);
-        document.addEventListener('mousedown', handleJumpAction);
-        document.addEventListener('touchstart', handleJumpAction);
-    }
-
-    function removeEventListeners() {
-        document.removeEventListener('keydown', handleKeyDown);
-        document.removeEventListener('mousedown', handleJumpAction);
-        document.removeEventListener('touchstart', handleJumpAction);
-    }
-
-    function handleKeyDown(event) {
-        if (event.code === 'Space') {
-            handleJumpAction(event);
-        }
-    }
-
-    startButton.addEventListener('click', startGame);
-</script>
