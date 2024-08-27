@@ -143,7 +143,6 @@ body {
 </style>
 </head>
 <body>
-
     <h1>Player: John Doe</h1>
     <div id="game-container">
         <img id="dino" src="dino.png" alt="Dino">
@@ -165,25 +164,15 @@ body {
                 </tr>
             </thead>
             <tbody>
-                <!-- Generate 100 rows of dummy data -->
                 <script>
-                    const dummyData = [
-                        { name: "John", score: "10m" },
-                        { name: "Paul", score: "9.9m" },
-                        { name: "George", score: "9.8m" },
-                        { name: "Ringo", score: "9.7m" },
-                        { name: "Mick", score: "9.6m" },
-                        { name: "Keith", score: "9.5m" },
-                        { name: "Charlie", score: "9.4m" },
-                        { name: "Ronnie", score: "9.3m" },
-                        { name: "Elton", score: "9.2m" },
-                        { name: "David", score: "9.1m" },
-                        // Add more entries if needed
-                    ];
+                    const names = ["John", "Paul", "George", "Ringo", "Mick"];
+                    const scores = ["10m", "9.9m", "9.8m", "9.7m", "9.6m"];
 
-                    for (let i = 0; i < dummyData.length; i++) {
+                    for (let i = 0; i < 100; i++) {
+                        const name = names[i % names.length];
+                        const score = scores[i % scores.length];
                         document.write(
-                            `<tr><td>${i + 1}</td><td>${dummyData[i].name}</td><td>${dummyData[i].score}</td></tr>`
+                            `<tr><td>${i + 1}</td><td>${name}</td><td>${score}</td></tr>`
                         );
                     }
                 </script>
